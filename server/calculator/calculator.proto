@@ -13,5 +13,5 @@ message ExpressionRequest {
 }
 
 message ResultResponse {
-  float result = 1;
+  int32 result = 1;
 }
