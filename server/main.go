@@ -20,7 +20,6 @@ func evaluateExpression(expression string, resultCh chan<- int32) {
 	// Use regular expression to capture operands and operator
 	regex := regexp.MustCompile(`\s*([-+*/])\s*`)
 	matches := regex.FindAllStringSubmatch(expression, -1)
-	fmt.Println("matches", matches)
 	if len(matches) != 1 || len(matches[0]) != 2 {
 		resultCh <- 0 // Invalid expression
 		return
@@ -31,7 +30,6 @@ func evaluateExpression(expression string, resultCh chan<- int32) {
 	operands := regex.Split(expression, -1)
 	operand1, err1 := strconv.Atoi(operands[0])
 	operand2, err2 := strconv.Atoi(operands[1])
-	fmt.Println("op1 and op2", operand1, operand2)
 
 	if err1 != nil || err2 != nil {
 		resultCh <- 0 // Invalid operands
