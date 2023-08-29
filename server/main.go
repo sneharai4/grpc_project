@@ -7,8 +7,6 @@ import (
 	"sync"
 
 	"google.golang.org/grpc"
-
-	"github.com/sneharai4/grpc_project/server/calculator"
 )
 
 type server struct{}
