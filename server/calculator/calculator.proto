@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package calculator;
+
+option go_package = "./";
+
+service CalculatorService {
+  rpc EvaluateExpression(ExpressionRequest) returns (ResultResponse);
+}
+
+message ExpressionRequest {
+  string expression = 1;
+}
+
+message ResultResponse {
+  int32 result = 1;
+}
