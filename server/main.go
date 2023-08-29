@@ -3,34 +3,72 @@ package main
 import (
 	"context"
 	"fmt"
-	"net"
-	"sync"
-
-	"github.com/sneharai4/grpc_project/server/calculator"
+	calculator "github.com/sneharai4/grpc_project/server/calculator"
 	"google.golang.org/grpc"
+	"net"
+	"regexp"
+	"strconv"
 )
 
-type server struct{}
+type server struct {
+	calculator.UnimplementedCalculatorServiceServer
+}
+
+func evaluateExpression(expression string, resultCh chan<- int32) {
+	defer close(resultCh)
+
+	// Use regular expression to capture operands and operator
+	regex := regexp.MustCompile(`\s*([-+*/])\s*`)
+	matches := regex.FindAllStringSubmatch(expression, -1)
+	fmt.Println("matches", matches)
+	if len(matches) != 1 || len(matches[0]) != 2 {
+		resultCh <- 0 // Invalid expression
+		return
+	}
+
+	match := matches[0]
+	operator := match[1]
+	operands := regex.Split(expression, -1)
+	operand1, err1 := strconv.Atoi(operands[0])
+	operand2, err2 := strconv.Atoi(operands[1])
+	fmt.Println("op1 and op2", operand1, operand2)
+
+	if err1 != nil || err2 != nil {
+		resultCh <- 0 // Invalid operands
+		return
+	}
+
+	var result int32
+
+	switch operator {
+	case "+":
+		result = int32(operand1 + operand2)
+	case "-":
+		result = int32(operand1 - operand2)
+	case "*":
+		result = int32(operand1 * operand2)
+	case "/":
+		if operand2 != 0 {
+			result = int32(operand1 / operand2)
+		} else {
+			resultCh <- 0 // Division by zero
+			return
+		}
+	default:
+		resultCh <- 0 // Invalid operator
+		return
+	}
+
+	resultCh <- result
+}
 
 func (s *server) EvaluateExpression(ctx context.Context, req *calculator.ExpressionRequest) (*calculator.ResultResponse, error) {
-	// Evaluate expression using goroutines and channels
-	// For simplicity, let's assume expressions are in the format "2 + 3"
-	// You can implement a more complex expression evaluator here
-
-	expression := req.Expression
-	var wg sync.WaitGroup
 	resultCh := make(chan int32)
 
-	// Split the expression into operands and operator
-	// Calculate result using goroutine
-	// Send the result to the channel
-	// Close the channel after calculation is done
-	// Wait for all goroutines to finish
+	go evaluateExpression(req.Expression, resultCh)
 
-	close(resultCh)
-
-	// Return the result in the response
-	return &calculator.ResultResponse{Result: <-resultCh}, nil
+	result := <-resultCh
+	return &calculator.ResultResponse{Result: result}, nil
 }
 
 func main() {

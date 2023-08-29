@@ -7,7 +7,7 @@ import (
 
 	"google.golang.org/grpc"
 
-	"github.com/sneharai4/grpc_project/server/calculator"
+	calculator "github.com/sneharai4/grpc_project/server/calculator"
 )
 
 func main() {
@@ -19,8 +19,16 @@ func main() {
 
 	client := calculator.NewCalculatorServiceClient(conn)
 
-	expression := "2 + 3" // Your arithmetic expression
-	req := &calculator.ExpressionRequest{Expression: expression}
+	// Read user input for the expression
+	fmt.Print("Enter an arithmetic expression (e.g., 2 + 3): ")
+	var expression string
+	fmt.Scanln(&expression)
+	fmt.Print("express is ", expression)
+
+	req := &calculator.ExpressionRequest{
+		Expression: expression,
+	}
+	fmt.Println("req is ", req.Expression)
 
 	resp, err := client.EvaluateExpression(context.Background(), req)
 	if err != nil {
